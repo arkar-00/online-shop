@@ -10,6 +10,7 @@ import { AuthService } from './auth/auth.service';
 import { EmailService } from './email/email.service';
 import { UsersController } from './users/users.controller';
 import { AuthController } from './auth/auth.controller';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -25,7 +26,9 @@ import { AuthController } from './auth/auth.controller';
       autoLoadEntities: true,
       entities: [],
       synchronize: true, // for dev only
-    })
+    }),
+
+    EmailModule
   ],
   controllers: [AppController, UsersController, AuthController],
   providers: [AppService, UsersService, AuthService, EmailService],
