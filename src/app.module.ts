@@ -11,6 +11,7 @@ import { EmailService } from './email/email.service';
 import { UsersController } from './users/users.controller';
 import { AuthController } from './auth/auth.controller';
 import { EmailModule } from './email/email.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -28,7 +29,9 @@ import { EmailModule } from './email/email.module';
       synchronize: true, // for dev only
     }),
 
-    EmailModule
+    EmailModule,
+
+    UsersModule
   ],
   controllers: [AppController, UsersController, AuthController],
   providers: [AppService, UsersService, AuthService, EmailService],
