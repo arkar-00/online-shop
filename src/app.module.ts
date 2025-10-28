@@ -5,6 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DataSource } from 'typeorm';
+import { UsersService } from './users/users.service';
+import { AuthService } from './auth/auth.service';
+import { EmailService } from './email/email.service';
+import { UsersController } from './users/users.controller';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
   imports: [
@@ -22,8 +27,8 @@ import { DataSource } from 'typeorm';
       synchronize: true, // for dev only
     })
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, UsersController, AuthController],
+  providers: [AppService, UsersService, AuthService, EmailService],
 })
 export class AppModule implements NestModule {
   constructor(private dataSource: DataSource) {
