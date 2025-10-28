@@ -4,6 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
+import { CategoriesService } from './categories/categories.service';
+import { ProductsService } from './products/products.service';
+import { ReviewsService } from './reviews/reviews.service';
+import { WishlistService } from './wishlist/wishlist.service';
 
 @Module({
   imports: [
@@ -25,5 +29,6 @@ import { EmailModule } from './email/email.module';
     UsersModule,
     EmailModule,
   ],
+  providers: [CategoriesService, ProductsService, ReviewsService, WishlistService],
 })
 export class AppModule {}
