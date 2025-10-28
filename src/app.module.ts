@@ -4,10 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
 import { DataSource } from 'typeorm';
-import { User } from './user/user.entity';
 
 @Module({
   imports: [
@@ -19,17 +16,11 @@ import { User } from './user/user.entity';
     // Initialize TypeORM after env is loaded
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT as string, 10) || 5432,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      entities: [User],
+      url: process.env.DB_HOST, // use the full connection string
+      autoLoadEntities: true,
+      entities: [],
       synchronize: true, // for dev only
-    }),
-
-    AuthModule,
-    UserModule,
+    })
   ],
   controllers: [AppController],
   providers: [AppService],
