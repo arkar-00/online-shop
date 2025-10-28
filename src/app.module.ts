@@ -8,6 +8,10 @@ import { CategoriesService } from './categories/categories.service';
 import { ProductsService } from './products/products.service';
 import { ReviewsService } from './reviews/reviews.service';
 import { WishlistService } from './wishlist/wishlist.service';
+import { CategoriesController } from './categories/categories.controller';
+import { ProductsController } from './products/products.controller';
+import { ReviewsController } from './reviews/reviews.controller';
+import { WishlistController } from './wishlist/wishlist.controller';
 
 @Module({
   imports: [
@@ -30,5 +34,6 @@ import { WishlistService } from './wishlist/wishlist.service';
     EmailModule,
   ],
   providers: [CategoriesService, ProductsService, ReviewsService, WishlistService],
+  controllers: [CategoriesController, ProductsController, ReviewsController, WishlistController],
 })
 export class AppModule {}
