@@ -4,14 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EmailModule } from './email/email.module';
-import { CategoriesService } from './categories/categories.service';
-import { ProductsService } from './products/products.service';
-import { ReviewsService } from './reviews/reviews.service';
-import { WishlistService } from './wishlist/wishlist.service';
-import { CategoriesController } from './categories/categories.controller';
-import { ProductsController } from './products/products.controller';
-import { ReviewsController } from './reviews/reviews.controller';
-import { WishlistController } from './wishlist/wishlist.controller';
+import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -32,8 +28,12 @@ import { WishlistController } from './wishlist/wishlist.controller';
     AuthModule,
     UsersModule,
     EmailModule,
+    CategoriesModule,
+    ProductsModule,
+    ReviewsModule,
+    WishlistModule,
   ],
-  providers: [CategoriesService, ProductsService, ReviewsService, WishlistService],
-  controllers: [CategoriesController, ProductsController, ReviewsController, WishlistController],
+  providers: [],
+  controllers: [],
 })
 export class AppModule {}

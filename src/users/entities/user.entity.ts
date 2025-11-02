@@ -11,6 +11,12 @@ export enum UserRole {
   USER = 'user',
 }
 
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -27,6 +33,22 @@ export class User {
 
   @Column({ nullable: true })
   lastName: string;
+
+  @Column({ nullable: true })
+  dob: Date;
+
+  @Column({ nullable: true })
+  phoneNumber: string;
+
+  @Column({
+    type: 'enum',
+    enum: Gender,
+    default: Gender.MALE,
+  })
+  gender: Gender;
+
+  @Column({ nullable: true })
+  pin: number;
 
   @Column({
     type: 'enum',

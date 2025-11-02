@@ -106,10 +106,29 @@ export class ProductsService {
   }
 
   async findOne(id: string): Promise<Product> {
-    const product = await this.productsRepository.findOne({
-      where: { id },
-      relations: ['category', 'variants', 'reviews', 'reviews.user'],
-    });
+    const product = await this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.variants', 'variants')
+      .leftJoinAndSelect('product.reviews', 'reviews')
+      .leftJoinAndSelect('reviews.user', 'user')
+      .select([
+        'product',
+        'category',
+        'variants',
+        'reviews.id',
+        'reviews.rating',
+        'reviews.comment',
+        'reviews.isVerifiedPurchase',
+        'reviews.createdAt',
+        // Only specific user fields in reviews
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+        'user.email',
+      ])
+      .where('product.id = :id', { id })
+      .getOne();
 
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -121,10 +140,29 @@ export class ProductsService {
   }
 
   async findBySlug(slug: string): Promise<Product> {
-    const product = await this.productsRepository.findOne({
-      where: { slug },
-      relations: ['category', 'variants', 'reviews', 'reviews.user'],
-    });
+    const product = await this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.variants', 'variants')
+      .leftJoinAndSelect('product.reviews', 'reviews')
+      .leftJoinAndSelect('reviews.user', 'user')
+      .select([
+        'product',
+        'category',
+        'variants',
+        'reviews.id',
+        'reviews.rating',
+        'reviews.comment',
+        'reviews.isVerifiedPurchase',
+        'reviews.createdAt',
+        // Only specific user fields in reviews
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+        'user.email',
+      ])
+      .where('product.slug = :slug', { slug })
+      .getOne();
 
     if (!product) {
       throw new NotFoundException('Product not found');

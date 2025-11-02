@@ -10,6 +10,8 @@ import { Review } from './entities/review.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ProductsService } from '../products/products.service';
+import { plainToInstance } from 'class-transformer';
+import { ReviewResponseDto } from './dto/review-response.dto';
 
 @Injectable()
 export class ReviewsService {
@@ -19,13 +21,11 @@ export class ReviewsService {
     private productsService: ProductsService,
   ) {}
 
-  async create(userId: string, createReviewDto: CreateReviewDto): Promise<Review> {
+  async create(userId: string, createReviewDto: CreateReviewDto): Promise<ReviewResponseDto> {
     const { productId } = createReviewDto;
 
-    // Check if product exists
     await this.productsService.findOne(productId);
 
-    // Check if user already reviewed this product
     const existingReview = await this.reviewsRepository.findOne({
       where: { userId, productId },
     });
@@ -40,22 +40,32 @@ export class ReviewsService {
     });
 
     const savedReview = await this.reviewsRepository.save(review);
-
-    // Update product rating
     await this.productsService.updateProductRating(productId);
 
-    return savedReview;
+    // Get review with user data
+    const reviewWithUser = await this.reviewsRepository.findOne({
+      where: { id: savedReview.id },
+      relations: ['user'],
+    });
+
+    return plainToInstance(ReviewResponseDto, reviewWithUser, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async findByProduct(productId: string): Promise<Review[]> {
-    return await this.reviewsRepository.find({
+  async findByProduct(productId: string): Promise<ReviewResponseDto[]> {
+    const reviews = await this.reviewsRepository.find({
       where: { productId },
       relations: ['user'],
       order: { createdAt: 'DESC' },
     });
+
+    return plainToInstance(ReviewResponseDto, reviews, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async findOne(id: string): Promise<Review> {
+  async findOne(id: string): Promise<ReviewResponseDto> {
     const review = await this.reviewsRepository.findOne({
       where: { id },
       relations: ['user', 'product'],
@@ -65,11 +75,24 @@ export class ReviewsService {
       throw new NotFoundException('Review not found');
     }
 
-    return review;
+    return plainToInstance(ReviewResponseDto, review, {
+      excludeExtraneousValues: true,
+    });
   }
 
-  async update(id: string, userId: string, updateReviewDto: UpdateReviewDto): Promise<Review> {
-    const review = await this.findOne(id);
+  async update(
+    id: string,
+    userId: string,
+    updateReviewDto: UpdateReviewDto,
+  ): Promise<ReviewResponseDto> {
+    const review = await this.reviewsRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
 
     if (review.userId !== userId) {
       throw new ForbiddenException('You can only update your own reviews');
@@ -78,14 +101,21 @@ export class ReviewsService {
     Object.assign(review, updateReviewDto);
     const updatedReview = await this.reviewsRepository.save(review);
 
-    // Update product rating
     await this.productsService.updateProductRating(review.productId);
 
-    return updatedReview;
+    return plainToInstance(ReviewResponseDto, updatedReview, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async remove(id: string, userId: string): Promise<void> {
-    const review = await this.findOne(id);
+    const review = await this.reviewsRepository.findOne({
+      where: { id },
+    });
+
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
 
     if (review.userId !== userId) {
       throw new ForbiddenException('You can only delete your own reviews');
@@ -94,7 +124,6 @@ export class ReviewsService {
     const productId = review.productId;
     await this.reviewsRepository.remove(review);
 
-    // Update product rating
     await this.productsService.updateProductRating(productId);
   }
 }

@@ -8,48 +8,46 @@ import {
   Delete,
   UseGuards,
   Request,
-  Query,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { ReviewResponseDto } from './dto/review-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
-  // ✅ PUBLIC: Get all reviews for a product
   @Get('product/:productId')
-  async findByProduct(@Param('productId') productId: string) {
+  async findByProduct(@Param('productId') productId: string): Promise<ReviewResponseDto[]> {
     return this.reviewsService.findByProduct(productId);
   }
 
-  // ✅ AUTHENTICATED: Create review
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(@Request() req, @Body() createReviewDto: CreateReviewDto) {
+  async create(
+    @Request() req,
+    @Body() createReviewDto: CreateReviewDto,
+  ): Promise<ReviewResponseDto> {
     return this.reviewsService.create(req.user.userId, createReviewDto);
   }
 
-  // ✅ PUBLIC: Get single review
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<ReviewResponseDto> {
     return this.reviewsService.findOne(id);
   }
 
-  // ✅ AUTHENTICATED: Update own review
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(
     @Param('id') id: string,
     @Request() req,
     @Body() updateReviewDto: UpdateReviewDto,
-  ) {
+  ): Promise<ReviewResponseDto> {
     return this.reviewsService.update(id, req.user.userId, updateReviewDto);
   }
 
-  // ✅ AUTHENTICATED: Delete own review
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string, @Request() req) {
