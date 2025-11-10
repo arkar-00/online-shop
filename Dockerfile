@@ -1,52 +1,56 @@
 # ==============================================================================
-# 1. DEVELOPMENT STAGE (Hot Reloading အတွက်)
+# 1. DEVELOPMENT STAGE (optional, for local hot reload)
 # ==============================================================================
 FROM node:20-alpine AS development
 
 WORKDIR /app
 COPY package*.json ./
 
-# Dev mode => full dependencies (including devDependencies)
+# Install all dependencies (dev + prod)
 RUN npm install
 
-# App files ကို copy
+# Copy app source code
 COPY . .
 
-# Expose port for local dev
+# Expose port for dev
 EXPOSE 3000
 
-# Dev mode => hot reload
+# Dev command with hot reload
 CMD ["npm", "run", "start:dev"]
 
 
 # ==============================================================================
-# 2. BUILD STAGE (Build for production)
+# 2. BUILD STAGE (compile NestJS for production)
 # ==============================================================================
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Copy package.json and install all dependencies for build
 COPY package*.json ./
 RUN npm install
+
+# Copy source code
 COPY . .
 
-# Build NestJS to dist/
+# Build NestJS app into dist/
 RUN npm run build
 
 
 # ==============================================================================
-# 3. PRODUCTION STAGE (Deploy-ready image)
+# 3. PRODUCTION STAGE
 # ==============================================================================
 FROM node:20-alpine AS production
 WORKDIR /app
 
-# Only install production dependencies
+# Copy package.json and install only production dependencies
 COPY package*.json ./
+RUN npm install --omit=dev
 
-# Copy dist from build stage
+# Copy compiled files from build stage
 COPY --from=build /app/dist ./dist
 
 # Expose app port
 EXPOSE 3000
 
-# Run production build
-CMD npm run start:prod
+# Start the app (JSON array recommended)
+CMD ["node", "dist/main.js"]
