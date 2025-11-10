@@ -4,54 +4,49 @@
 FROM node:20-alpine AS development
 
 WORKDIR /app
+COPY package*.json ./
 
-COPY package.json package-lock.json ./
+# Dev mode => full dependencies (including devDependencies)
 RUN npm install
+
+# App files ကို copy
 COPY . .
 
+# Expose port for local dev
+EXPOSE 3000
+
+# Dev mode => hot reload
+CMD ["npm", "run", "start:dev"]
+
+
 # ==============================================================================
-# 2. BUILD STAGE (Dependency Install နှင့် Project Build လုပ်ရန်)
+# 2. BUILD STAGE (Build for production)
 # ==============================================================================
 FROM node:20-alpine AS build
-
-# Working directory သတ်မှတ်ခြင်း
 WORKDIR /app
 
-# Package.json နဲ့ lock files တွေကို ကူးယူခြင်း
-COPY package.json package-lock.json ./
-
-# Dependencies များ Install လုပ်ခြင်း
+COPY package*.json ./
 RUN npm install
-
-# Project Files အားလုံးကို ကူးယူခြင်း
 COPY . .
 
-# NestJS Project ကို Production အတွက် Build လုပ်ခြင်း
-# (Output ကို dist/ folder ထဲ ထုတ်ပေးပါမယ်)
+# Build NestJS to dist/
 RUN npm run build
 
 
 # ==============================================================================
-# 3. PRODUCTION STAGE (App ကို Run ဖို့အတွက် အလွန်ပေါ့ပါးသော Image)
+# 3. PRODUCTION STAGE (Deploy-ready image)
 # ==============================================================================
 FROM node:20-alpine AS production
-
-# Working directory သတ်မှတ်ခြင်း
 WORKDIR /app
 
-# Dependencies ကို လျော့ချထားတဲ့ package.json နဲ့ Production dependencies တွေ ကူးယူခြင်း
-COPY package.json ./
-RUN npm install --production
+# Only install production dependencies
+COPY package*.json ./
 
-# Build Stage က ထွက်လာတဲ့ dist/ folder ကို ကူးယူခြင်း
+# Copy dist from build stage
 COPY --from=build /app/dist ./dist
 
-# .env file ကို ကူးယူခြင်း (သို့သော် AWS မှာ Environment Variables သုံးတာ ပိုကောင်းပါတယ်)
-# COPY .env ./.env
-
-# Container Run တဲ့အခါ ဖွင့်မယ့် Port
+# Expose app port
 EXPOSE 3000
 
-# Application စတင် Run ဖို့ Command
-# NestJS ရဲ့ main.js ကို Run ပါမယ်
+# Run production build
 CMD npm run start:prod
