@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: nestjs-api-dev
+    build:
+      context: .
+      target: development # ⬅️ IMPORTANT
+    volumes:
+      - ./:/app # ⬅️ Live reload
+      - /app/node_modules # ⬅️ Prevent node_modules override
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+
+      # ---- Database env ----
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+      DATABASE_USER: nestjs_user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: nestjs_db
+
+      # ---- JWT ----
+      JWT_SECRET: dev-secret
+      JWT_EXPIRATION: 1h
+      JWT_REFRESH_SECRET: dev-refresh
+      JWT_REFRESH_EXPIRATION: 7d
+
+      # ---- Email ----
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_PORT: 587
+      EMAIL_USER: akoucsmub@gmail.com
+      EMAIL_PASSWORD: ivpz fuys zowj enkh
+      EMAIL_FROM: akoucsmub@gmail.com
+
+      # ---- App ----
+      APP_URL: http://localhost:3000
+
+    depends_on:
+      database:
+        condition: service_healthy
+    command: npm run start:dev # ⬅️ Hot reload
+
+  database:
+    container_name: postgres-db-dev
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nestjs_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: nestjs_db
+    ports:
+      - '5432:5432' # ⬅️ visible for local tools like TablePlus
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U nestjs_user']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_dev_data:
